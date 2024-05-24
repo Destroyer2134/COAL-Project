@@ -1,0 +1,6 @@
+﻿  Assembling Source.asm...
+Source.asm(7): error A2008: syntax error : .
+Source.asm(8): error A2008: syntax error : .
+Source.asm(9): error A2008: syntax error : .
+Source.asm(10): fatal error A1000: cannot open file : irvine32.inc
+C:\Program Files\Microsoft Visual Studio\2022\Community\MSBuild\Microsoft\VC\v170\BuildCustomizations\masm.targets(70,5): error MSB3721: The command "ml64.exe /c /nologo /Zi /Fo"x64\Debug\Source.obj" /W3 /errorReport:prompt  /TaSource.asm" exited with code 1.
