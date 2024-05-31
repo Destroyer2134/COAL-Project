@@ -5,250 +5,240 @@
 ; Date:              Modified by:
 
 .386
-.model flat,stdcall
+.model flat, stdcall
 .stack 4096
 INCLUDE irvine32.inc
 ExitProcess PROTO, dwExitCode:DWORD
+
 MyStruct STRUCT
-    field0 DWORD ?
-    field1 DWORD ?
-    ;field2 DWORD 10 Dup(?),0
+    ID DWORD ?
+    NUM DWORD ?
 MyStruct ENDS
+
 .data
 MyArray MyStruct 10 DUP({0,0})
-var dword ?
-msg0 byte"TO Search Press 1: ",0ah,0dh,"TO ADD PRESS 2:  ",0
-msg00 byte"To Run Again Press 1: ",0
-msg byte"Enter an Id u want to search: ",0
-msg111 byte"Invalid Input ",0
-msg1 byte"Invalid ID ",0
-msg11 byte"Array Full ",0
-msg2 byte"If u wanna delete Press 1: ",0
-msg3 byte "Enter Phone Number: ",0
-;msg4 byte "Enter Name: ",0
-msg33 byte "ID Number: ",0
-msg44 byte "Phone Number: ",0
+
+count DWORD ?
+
+msgMenu byte "Press 1 to Search, Press 2 to Add: ", 0
+
+msgRunAgain byte "Press 1 to Run Again OR Any Other Key To Exit: ", 0
+
+msgSearchPrompt byte "Enter the ID you want to search for: ", 0
+
+msgInvalidInput byte "Invalid Input", 0
+
+msgInvalidID byte "Invalid ID", 0
+
+msgArrayFull byte "Array Full", 0
+
+msgDeletePrompt byte "Enter 1 to Delete or any other key to run again: ", 0
+
+msgPhonePrompt byte "Enter Phone Number: ", 0
+
+msgIDNumber byte "ID Number: ", 0
+
+msgPhoneNumber byte "Phone Number: ", 0
+
 .code
 main PROC
-  mov edx,0
-  mov esi,0
-  mov MyArray[esi].field0,1
-  mov MyArray[esi].field1,03135422585
-  mov ebx,0
+    mov edx, 0
+    mov esi, 0
+    mov MyArray[esi].ID, 1
+    mov MyArray[esi].NUM, 03135422585
+    mov ebx, 0
 
-                             ; mov MyArray[esi].field2[ebx],'H'
-                              ;inc ebx
-                              ;  mov MyArray[esi].field2[ebx],'a'
-                               ; inc ebx
-                                ; mov MyArray[esi].field2[ebx],'m'
-                                ;inc ebx
-                                ; mov MyArray[esi].field2[ebx],'m'
-                                ;inc ebx
-                                ; mov MyArray[esi].field2[ebx],'a'
-                               ;  inc ebx
-                                   ; mov Myarray[esi].field2[ebx],'d'
-        mov edx, offset msg33
-        call WriteString
-        mov eax,MyArray[0].field0
-         call writedec  
-         call crlf
-           mov edx, offset msg44
-        call WriteString
-        mov eax,MyArray[0].field1
-         call WriteDec
-         call crlf
-                                 ; mov edx,offset MyArray.field2
-                             ;call writeString   
-  add esi, SIZEOF MyStruct
-       mov MyArray[esi].field0,2
-       mov MyArray[esi].field1,03455455789
-  mov ebx,0
-  mov edx,0
-                      ;mov MyArray[esi].field2[ebx],'S'
-                     ; inc ebx
-                        ;mov MyArray[esi].field2[ebx],'a'
-                        ;inc ebx
-                        ; mov MyArray[esi].field2[ebx],'a'
-                        ;inc ebx
-                         ;mov MyArray[esi].field2[ebx],'d'
-  call crlf
-    mov edx, offset msg33
-        call WriteString
-   mov eax,MyArray[esi].field0
- call writedec
- call crlf
-   mov edx, offset msg44
-        call WriteString
-  mov eax,MyArray [esi].field1
- call writedec 
- call crlf
-                    ;mov edx,offset MyArray [8].field2
-                    ; call writeString   
- mov var, 2
- l0:
-mov edx, offset msg0
-call  crlf
-call WriteString
-Call readInt
-cmp eax,1
-je ls
-cmp eax,2
-je la
-jmp ji
-ls:
-            call search
- la:
-             call addP
-             call Display
-             jmp l0
-             jmp exitLB
-ji:
-        mov edx,offset msg111
-        call crlf
-        call WriteString
-        mov edx, offset msg00
-        call WriteString
-        call ReadInt
-        cmp eax,1
-        je l0
-        jmp exitLB
+    mov edx, offset msgIDNumber
+    call WriteString
+    mov eax, MyArray[0].ID
+    call WriteDec  
+    call crlf
+    mov edx, offset msgPhoneNumber
+    call WriteString
+    mov eax, MyArray[0].NUM
+    call WriteDec
+    call crlf
+                                 
+    add esi, SIZEOF MyStruct
+    mov MyArray[esi].ID, 2
+    mov MyArray[esi].NUM, 03455455789
+    mov ebx, 0
+    mov edx, 0
+    call crlf
 
+    mov edx, offset msgIDNumber
+    call WriteString
+    mov eax, MyArray[esi].ID
+    call WriteDec
+    call crlf
+    mov edx, offset msgPhoneNumber
+    call WriteString
+    mov eax, MyArray[esi].NUM
+    call WriteDec 
+    call crlf
 
- 
+    mov count, 2
 
- END2LB::
- call crlf
- mov edx, offset msg11
- call WriteString
- jmp exitLB
- ENDLB::
- mov edx, offset msg2
- call crlf
- call WriteString
- call ReadInt
- cmp eax, 1
-jne l0
-call delete
- jmp exitLB
+MenuLoop:
 
- exitLB::
-	INVOKE ExitProcess,0
+    mov edx, offset msgMenu
+    call crlf
+    call WriteString
+    Call readInt
+    call clrscr
+    cmp eax, 1
+    je SearchOption
+    cmp eax, 2
+    je AddOption
+    jmp InvalidInput
+    
+SearchOption:
+    call Search
+    call DeleteOption
+    jmp RunAgainPrompt
+    
+AddOption:
+    call AddRecord
+    call DisplayRecords
+    jmp RunAgainPrompt
+    
+InvalidInput:
+    mov edx, offset msgInvalidInput
+    call crlf
+    call WriteString
+    jmp RunAgainPrompt
+    
+
+RunAgainPrompt:
+    mov edx, offset msgRunAgain
+    call crlf
+    call WriteString
+    call ReadInt
+    cmp eax, 1
+    je MenuLoop
+    jmp ExitProgram
+
+ExitProgram:
+    INVOKE ExitProcess, 0
+
 main ENDP
+
 ; (insert additional procedures here)
-search proc
-            call crlf
-            mov edx, offset msg
-            call crlf
-            call WriteString
-            call Readint
-            mov ecx, lengthof myArray
-            mov esi,0
-            l1:
-            cmp eax, myArray[esi].field0
-            jne l2
-            call crlf
-            mov edx, offset msg33
-                   call WriteString
 
-            mov eax, myArray[esi].field0
-            
-            call WriteDec
-            call crlf
-            mov edx, offset msg44
-                   call WriteString
-            mov eax, myArray[esi].field1
-            
-            call WriteDec
-                                ;mov edx,myArray[esi].field2
-                                ;call WriteString
-            jmp ENDLB
-            l2:
-            add esi, 4
-            loop l1
-            mov edx, offset msg1
-            call crlf
-            call WriteString
-ret
-search endp
-
-
-addP proc 
-                   
-                    mov esi, 0
-                    mov ecx, sizeof MyArray
-                    lop:
-                    cmp MyArray[esi].field0, 0
-                    je empty
-                    add esi, sizeof MyStruct
-
-
-                    loop lop
-                    jmp END2LB
-
-
-
-
-
-
-
-
-
-                    
-                    inc var
-                    mov ebx, var
-                    ;mov eax, sizeof MyStruct
-                   ; mul var
-                    ;mov esi, eax
-                    empty:
-                     inc var
-                     mov ebx, var
-                    mov myArray[esi].field0,ebx
-                    mov edx, offset msg3
-                    call crlf 
-                    call Writestring
-                    call ReadDec
-                    mov myArray[esi].field1,eax
-                                           ; mov edx, offset msg4
-                                            ;call crlf 
-                                           ; call WriteString
-                                        ;mov edx, myArray[esi].field2
-                                        ;mov ecx, 10
-                                        ;call ReadString
-                                        ;mov myArray[esi].field2,eax
-                                        
-ret
-addp endp
-Display PROC
+Search proc
+    call crlf
+    mov edx, offset msgSearchPrompt
+    call crlf
+    call WriteString
+    call Readint
     mov ecx, LENGTHOF MyArray
     mov esi, 0
 
-displayLoop:
-                cmp MyArray[esi].field0, 0
-                je skip
-                call crlf
-                  mov edx, offset msg33
-                   call WriteString
-                mov eax, MyArray[esi].field0
-                call WriteDec
-                call crlf
-                  mov edx, offset msg44
-                     call WriteString
-                mov eax, MyArray[esi].field1
-                call WriteDec
-                add esi, type MyStruct
-                dec ecx
-                jnz displayLoop
-            skip:
+SearchLoop:
+    cmp eax, MyArray[esi].ID
+    jne NotFound
+    call crlf
+    mov edx, offset msgIDNumber
+    call WriteString
+    mov eax, MyArray[esi].ID
+    call WriteDec
+    call crlf
+    mov edx, offset msgPhoneNumber
+    call WriteString
+    mov eax, MyArray[esi].NUM
+    call WriteDec
+    call crlf
+    jmp EndSearch
 
-                ret
-Display ENDP
+    NotFound:
+    add esi,sizeof mystruct
+    loop SearchLoop
+    mov edx, offset msgInvalidID
+    call crlf
+    call WriteString
+    call crlf
 
+    EndSearch:
+    ret
 
-delete proc
-mov MyArray[esi].field0, 0
-mov MyArray[esi].field1,0
-dec var
-call display
-ret
-delete endp
+Search endp
+
+AddRecord proc 
+    mov esi, 0
+    mov ecx, sizeof MyArray
+
+AddRecordLoop:
+    cmp MyArray[esi].ID, 0
+    je RecordEmpty
+    add esi, sizeof MyStruct
+    loop AddRecordLoop
+    jmp ArrayFull
+
+RecordEmpty:
+    inc count
+    mov ebx, count
+    mov MyArray[esi].ID, ebx
+    mov edx, offset msgPhonePrompt
+    call crlf 
+    call WriteString
+    call ReadDec
+    mov MyArray[esi].NUM, eax
+    ret
+
+ArrayFull:
+    mov edx, offset msgArrayFull
+    call crlf
+    call WriteString
+    ret
+
+AddRecord endp
+
+DisplayRecords PROC
+    mov ecx, LENGTHOF MyArray
+    mov esi, 0
+
+DisplayLoop:
+    cmp ecx,0          
+    je DisplayDone 
+
+    cmp MyArray[esi].ID, 0
+    je SkipRecord
+    call crlf
+    mov edx, offset msgIDNumber
+    call WriteString
+    mov eax, MyArray[esi].ID
+    call WriteDec
+    call crlf
+    mov edx, offset msgPhoneNumber
+    call WriteString
+    mov eax, MyArray[esi].NUM
+    call WriteDec
+SkipRecord:
+    add esi, SIZEOF MyStruct
+    dec ecx
+    jmp DisplayLoop   
+DisplayDone:
+ ret
+DisplayRecords ENDP
+
+DeleteOption proc
+    mov edx, offset msgDeletePrompt
+    call crlf
+    call WriteString
+    call ReadInt
+    cmp eax, 1
+    jne NoDelete
+    call DeleteRecord
+NoDelete:
+    ret
+
+DeleteOption endp
+
+DeleteRecord proc
+    mov MyArray[esi].ID, 0
+    mov MyArray[esi].NUM, 0
+    call DisplayRecords
+    ret
+DeleteRecord endp
+
 END main

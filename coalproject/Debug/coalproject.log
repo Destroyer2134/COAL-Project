@@ -1,1 +1,3 @@
-﻿  coalproject.vcxproj -> C:\Users\Adeel\Desktop\COAL-Project\Debug\coalproject.exe
+﻿  Assembling Source.asm...
+C:\irvine\SmallWin.inc(11): warning A4011: multiple .MODEL directives found : .MODEL ignored
+  coalproject.vcxproj -> C:\Users\Adeel\Desktop\COAL-Project\Debug\coalproject.exe
